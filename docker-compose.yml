@@ -1,0 +1,47 @@
+version: '3.3'
+services:
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data:/data
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+    env_file: ./.env
+
+  postgresql:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    env_file: ./.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: vk_longpoll_bakery/
+    container_name: vk_longpoll_bakery
+    depends_on:
+      - redis
+      - postgresql
+    links:
+      - redis
+    ports:
+      - "8000:8000"
+    env_file: ./.env
+
+volumes:
+  data:
+  pgdata:
