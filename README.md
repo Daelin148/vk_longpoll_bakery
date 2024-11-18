@@ -17,7 +17,7 @@
 1. Форкнуть репозиторий в свой Github и клонировать  его:
 
 ```
-git clone https://github.com/{Username}/api_yamdb
+https://github.com/{Username}/vk_longpoll_bakery
 ```
 2. Добавить следующие secrets в .env своего локального репозитория:
 - VK_LONPOLL_API_TOKEN=<YOUR_API_TOKEN>
